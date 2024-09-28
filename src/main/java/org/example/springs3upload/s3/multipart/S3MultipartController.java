@@ -3,6 +3,7 @@ package org.example.springs3upload.s3.multipart;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +30,7 @@ public class S3MultipartController {
                 long contentLength = file.getSize(); // 파일 크기 가져오기
                 System.out.println("contentLength = " + contentLength);
                 // S3에 업로드 (key에 디렉토리 경로 포함)
-                String key = directoryPath + file.getOriginalFilename() + System.currentTimeMillis(); // 디렉토리 경로와 파일명 결합
+                String key = directoryPath + file.getOriginalFilename() + UUID.randomUUID(); // 디렉토리 경로와 파일명 결합
                 s3UploadService.uploadImageToS3("techcourse-project-2024", key, inputStream, contentLength);
             } catch (IOException e) {
                 e.printStackTrace();

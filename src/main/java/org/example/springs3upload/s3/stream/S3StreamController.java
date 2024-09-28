@@ -3,6 +3,7 @@ package org.example.springs3upload.s3.stream;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 import org.example.springs3upload.s3.multipart.S3UploadService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,7 @@ public class S3StreamController {
             String directoryPath = "haeng-dong/s3-upload-test/"; // 원하는 디렉토리 경로
 
             // 파일명을 헤더에서 받거나 직접 지정x
-            String fileName = request.getHeader("file-name") + System.currentTimeMillis();
+            String fileName = request.getHeader("file-name") + UUID.randomUUID();
             if (fileName == null || fileName.isEmpty()) {
                 fileName = "default-file-name";
             }
