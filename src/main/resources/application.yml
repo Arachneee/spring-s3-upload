@@ -4,8 +4,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 500MB
-      max-request-size: 1GB
+      max-file-size: 2GB
+      max-request-size: 10GB
 
 management:
   endpoints:
