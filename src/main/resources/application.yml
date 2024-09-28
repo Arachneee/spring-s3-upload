@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: spring-s3-upload
+
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 1GB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
