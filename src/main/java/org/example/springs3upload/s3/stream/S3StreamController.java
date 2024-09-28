@@ -25,8 +25,8 @@ public class S3StreamController {
 
             String directoryPath = "haeng-dong/s3-upload-test/"; // 원하는 디렉토리 경로
 
-            // 파일명을 헤더에서 받거나 직접 지정
-            String fileName = request.getHeader("file-name");
+            // 파일명을 헤더에서 받거나 직접 지정x
+            String fileName = request.getHeader("file-name") + System.currentTimeMillis();
             if (fileName == null || fileName.isEmpty()) {
                 fileName = "default-file-name";
             }

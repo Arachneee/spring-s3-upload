@@ -29,7 +29,7 @@ public class S3MultipartController {
                 long contentLength = file.getSize(); // 파일 크기 가져오기
                 System.out.println("contentLength = " + contentLength);
                 // S3에 업로드 (key에 디렉토리 경로 포함)
-                String key = directoryPath + file.getOriginalFilename(); // 디렉토리 경로와 파일명 결합
+                String key = directoryPath + file.getOriginalFilename() + System.currentTimeMillis(); // 디렉토리 경로와 파일명 결합
                 s3UploadService.uploadImageToS3("techcourse-project-2024", key, inputStream, contentLength);
             } catch (IOException e) {
                 e.printStackTrace();
