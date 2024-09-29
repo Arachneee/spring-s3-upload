@@ -12,6 +12,7 @@
 <button id="uploadStreamButton">Stream Upload</button>
 <button id="uploadMultipartFilesButton">Multipart File Upload</button>
 <button id="uploadAwsMultiPartButton">AWS MultiPart Upload</button>
+<button id="uploadMultipartFilesWebpButton">Multipart File Web Upload</button>
 
 <script>
     // Replace this with your actual API endpoint
@@ -48,6 +49,17 @@
         }
         const files = fileInput.files;
         uploadMultipleFiles(files); // Upload files via Multipart in parallel
+    });
+
+    // Event listener for Multipart File Upload Button
+    document.getElementById('uploadMultipartFilesWebpButton').addEventListener('click', () => {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput.files.length === 0) {
+            alert('Please select at least one file.');
+            return;
+        }
+        const files = fileInput.files;
+        uploadMultipleFilesWebp(files); // Upload files via Multipart in parallel
     });
 
     // AWS MultiPart 방식
@@ -187,6 +199,31 @@
 
             const startTime = performance.now();
             const response = await axios.post(`${API_ENDPOINT}/multipart-files`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            const endTime = performance.now(); // End timing
+
+            console.log(`Multipart File Upload Execution time: ${(endTime - startTime).toFixed(2)} ms`);
+            console.log('Multipart file upload response:', response.data);
+            alert('Multipart file upload completed successfully');
+        } catch (error) {
+            console.error('Error during multipart file upload:', error);
+            alert('Multipart file upload failed');
+        }
+    }
+
+    // MultiPart Webp 변환
+    async function uploadMultipleFilesWebp(files) {
+        try {
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('uploadFiles', files[i]); // Multiple files appended with the same key
+            }
+
+            const startTime = performance.now();
+            const response = await axios.post(`${API_ENDPOINT}/multipart-files/webp`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
