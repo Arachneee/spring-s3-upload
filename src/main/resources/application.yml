@@ -11,6 +11,8 @@ server:
   tomcat:
     threads:
       max: 300
+    mbeanregistry:
+      enabled: true
 
 management:
   endpoints:
