@@ -10,6 +10,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,35 +47,42 @@ public class S3MultipartController {
     }
 
     @PostMapping("/api/s3/multipart-files/webp")
-    public String uploadMultipleWebpFiles(
+    public String uploadMultipleFilesAsWebP(
             @RequestPart("uploadFiles") List<MultipartFile> multipartFiles) {
-        String directoryPath = "haeng-dong/s3-upload-test/"; // 원하는 디렉토리 경로
+        String directoryPath = "haeng-dong/s3-upload-test/";
 
         for (MultipartFile file : multipartFiles) {
             try (InputStream inputStream = file.getInputStream()) {
-                // 이미지 파일을 BufferedImage로 읽기
-                BufferedImage image = ImageIO.read(inputStream);
-                if (image == null) {
-                    // 이미지가 아닌 경우 처리
-                    continue;
-                }
+                // 1. 업로드된 파일을 BufferedImage로 읽기
+                BufferedImage originalImage = ImageIO.read(inputStream);
 
-                // BufferedImage를 webp 포맷으로 변환하여 ByteArrayOutputStream에 쓰기
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write(image, "webp", baos);
+                // 2. WebP로 변환하기 위해 ByteArrayOutputStream 사용
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-                // ByteArrayOutputStream에서 InputStream과 내용 길이 얻기
-                byte[] imageBytes = baos.toByteArray();
-                InputStream webpInputStream = new ByteArrayInputStream(imageBytes);
-                long contentLength = imageBytes.length;
+                // 3. WebP Writer 가져오기
+                ImageWriter writer = ImageIO.getImageWritersByFormatName("webp").next();
+                ImageOutputStream ios = ImageIO.createImageOutputStream(os);
+                writer.setOutput(ios);
 
-                // 파일명을 webp 확장자로 변경하고 UUID 추가
-//                String originalFilename = file.getOriginalFilename();
-                String newFilename = UUID.randomUUID() + ".webp";
-                String key = directoryPath + newFilename;
+                // 4. BufferedImage를 WebP로 변환하여 출력 스트림에 쓰기
+                writer.write(originalImage);
 
-                // S3에 업로드
+                // 5. 리소스 해제
+                ios.close();
+                writer.dispose();
+
+                // 6. 변환된 WebP 이미지를 S3에 업로드 (InputStream으로 변환)
+                InputStream webpInputStream = new ByteArrayInputStream(os.toByteArray());
+                long contentLength = os.size();
+
+                // 7. 파일명 처리 (기존 확장자를 제거하고 ".webp" 추가)
+                String originalFileName = file.getOriginalFilename();
+                String fileNameWithoutExtension = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
+                String key = directoryPath + fileNameWithoutExtension + UUID.randomUUID() + ".webp";
+
+                // 8. S3에 업로드
                 s3UploadService.uploadImageToS3("techcourse-project-2024", key, webpInputStream, contentLength);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
