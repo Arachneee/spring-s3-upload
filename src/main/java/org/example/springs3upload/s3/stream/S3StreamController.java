@@ -19,9 +19,7 @@ public class S3StreamController {
 
     @PostMapping("/api/s3/stream")
     public String uploadFileByStream(HttpServletRequest request) {
-        try {
-            // 클라이언트에서 받은 파일 데이터를 InputStream으로 읽어오기
-            InputStream inputStream = request.getInputStream();
+        try (InputStream inputStream = request.getInputStream()) {
             long contentLength = request.getContentLengthLong();
 
             String directoryPath = "haeng-dong/s3-upload-test/"; // 원하는 디렉토리 경로
