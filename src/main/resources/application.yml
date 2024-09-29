@@ -12,3 +12,8 @@ management:
     web:
       exposure:
         include: prometheus
+server:
+  tomcat:
+    threads:
+      max: 200
+    accept-count: 100
