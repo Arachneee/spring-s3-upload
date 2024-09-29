@@ -15,5 +15,6 @@ management:
 server:
   tomcat:
     threads:
-      max: 200
-    accept-count: 100
+      max: 300
+    accept-count: 200
+    max-connections: 300
