@@ -34,7 +34,7 @@ public class S3UploadService {
                 .bucket(bucketName)
                 .key(key)
                 .contentLength(contentLength) // contentLength 추가
-                .contentType("image/png")
+                .contentType("image/" + key.split("\\.")[1])
                 .build();
 
         s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, contentLength));
