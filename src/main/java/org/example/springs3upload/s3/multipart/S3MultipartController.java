@@ -1,19 +1,15 @@
 package org.example.springs3upload.s3.multipart;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.ImageOutputStream;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,18 +45,35 @@ public class S3MultipartController {
     }
 
     @PostMapping("/api/s3/multipart-files/webp")
-    public String uploadMultipleFilesWebp(
-            @RequestPart("uploadFiles") List<MultipartFile> multipartFiles) throws IOException {
+    public String uploadMultipleWebpFiles(
+            @RequestPart("uploadFiles") List<MultipartFile> multipartFiles) {
         String directoryPath = "haeng-dong/s3-upload-test/"; // 원하는 디렉토리 경로
 
         for (MultipartFile file : multipartFiles) {
-            File webp = convertToWebp(file);
-            try (InputStream inputStream = new FileInputStream(webp)) {
-                long contentLength = webp.length(); // 파일 크기 가져오기
-                System.out.println("contentLength = " + contentLength);
-                // S3에 업로드 (key에 디렉토리 경로 포함)
-                String key = directoryPath + UUID.randomUUID() + webp.getName(); // 디렉토리 경로와 파일명 결합
-                s3UploadService.uploadImageToS3("techcourse-project-2024", key, inputStream, contentLength);
+            try (InputStream inputStream = file.getInputStream()) {
+                // 이미지 파일을 BufferedImage로 읽기
+                BufferedImage image = ImageIO.read(inputStream);
+                if (image == null) {
+                    // 이미지가 아닌 경우 처리
+                    continue;
+                }
+
+                // BufferedImage를 webp 포맷으로 변환하여 ByteArrayOutputStream에 쓰기
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(image, "webp", baos);
+
+                // ByteArrayOutputStream에서 InputStream과 내용 길이 얻기
+                byte[] imageBytes = baos.toByteArray();
+                InputStream webpInputStream = new ByteArrayInputStream(imageBytes);
+                long contentLength = imageBytes.length;
+
+                // 파일명을 webp 확장자로 변경하고 UUID 추가
+                String originalFilename = file.getOriginalFilename();
+                String newFilename = originalFilename.split(".")[0] + UUID.randomUUID() + ".webp";
+                String key = directoryPath + newFilename;
+
+                // S3에 업로드
+                s3UploadService.uploadImageToS3("techcourse-project-2024", key, webpInputStream, contentLength);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -69,33 +82,33 @@ public class S3MultipartController {
         return "업로드 완료";
     }
 
-    public File convertToWebp(MultipartFile multipartFile) throws IOException {
-        // MultipartFile에서 BufferedImage로 읽기
-        BufferedImage image = ImageIO.read(multipartFile.getInputStream());
-
-        // webp 형식으로 변환할 파일 생성
-        File webpFile = new File("변환된_이미지.webp");
-
-        // ImageWriter 가져오기
-        ImageWriter writer = ImageIO.getImageWritersByFormatName("webp").next();
-
-        // 출력 스트림 설정
-        try (ImageOutputStream ios = ImageIO.createImageOutputStream(webpFile)) {
-            writer.setOutput(ios);
-
-            // 이미지 쓰기 파라미터 설정 (품질 조절 등)
-            ImageWriteParam param = writer.getDefaultWriteParam();
-            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-            param.setCompressionQuality(0.8f); // 품질 설정 (0.0f ~ 1.0f)
-
-            // 이미지 쓰기
-            writer.write(null, new IIOImage(image, null, null), param);
-        } finally {
-            writer.dispose();
-        }
-
-        return webpFile;
-    }
+//    public File convertToWebp(MultipartFile multipartFile) throws IOException {
+//        // MultipartFile에서 BufferedImage로 읽기
+//        BufferedImage image = ImageIO.read(multipartFile.getInputStream());
+//
+//        // webp 형식으로 변환할 파일 생성
+//        File webpFile = new File("변환된_이미지.webp");
+//
+//        // ImageWriter 가져오기
+//        ImageWriter writer = ImageIO.getImageWritersByFormatName("webp").next();
+//
+//        // 출력 스트림 설정
+//        try (ImageOutputStream ios = ImageIO.createImageOutputStream(webpFile)) {
+//            writer.setOutput(ios);
+//
+//            // 이미지 쓰기 파라미터 설정 (품질 조절 등)
+//            ImageWriteParam param = writer.getDefaultWriteParam();
+//            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+//            param.setCompressionQuality(0.8f); // 품질 설정 (0.0f ~ 1.0f)
+//
+//            // 이미지 쓰기
+//            writer.write(null, new IIOImage(image, null, null), param);
+//        } finally {
+//            writer.dispose();
+//        }
+//
+//        return webpFile;
+//    }
 
     @PostMapping("/api/s3/multipart-files/future")
     public String uploadMultipleFilesFuture(
