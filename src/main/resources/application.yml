@@ -12,9 +12,3 @@ management:
     web:
       exposure:
         include: prometheus
-server:
-  tomcat:
-    threads:
-      max: 300
-    accept-count: 200
-    max-connections: 300
