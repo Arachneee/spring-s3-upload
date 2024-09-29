@@ -7,6 +7,11 @@ spring:
       max-file-size: 2GB
       max-request-size: 10GB
 
+server:
+  tomcat:
+    threads:
+      max: 300
+
 management:
   endpoints:
     web:

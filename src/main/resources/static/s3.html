@@ -144,38 +144,6 @@
 
     // Stream 방식
     // Function to upload multiple files via stream, each file in parallel
-    // async function uploadFilesViaStream(files) {
-    //     try {
-    //         const startTime = performance.now();
-    //
-    //         // Create an array of promises for each file to be uploaded in parallel
-    //         const uploadPromises = Array.from(files).map(file => {
-    //             const fileName = file.name;
-    //             const formData = new FormData();
-    //             formData.append('file', file);
-    //
-    //             const headers = {
-    //                 'file-name': fileName,
-    //                 'Content-Type': file.type || 'application/octet-stream',
-    //             };
-    //
-    //             // Send stream upload request for each file
-    //             return axios.post(`${API_ENDPOINT}/stream`, file, { headers });
-    //         });
-    //
-    //         // Wait for all file uploads to complete
-    //         const responses = await Promise.all(uploadPromises);
-    //
-    //         const endTime = performance.now(); // End timing
-    //         console.log(`Stream Upload Execution time for all files: ${(endTime - startTime).toFixed(2)} ms`);
-    //         console.log('Stream upload responses:', responses);
-    //         alert('All files uploaded successfully via stream');
-    //     } catch (error) {
-    //         console.error('Error during stream uploads:', error);
-    //         alert('Stream uploads failed');
-    //     }
-    // }
-
     async function uploadFilesViaStream(files) {
         try {
             const startTime = performance.now();
@@ -187,12 +155,12 @@
                 formData.append('file', file);
 
                 const headers = {
-                    'file-name': encodeURIComponent(fileName), // 파일 이름을 인코딩
-                    // 'Content-Type': file.type || 'application/octet-stream', // 생략
+                    'file-name': encodeURIComponent(fileName),
+                    'Content-Type': file.type || 'application/octet-stream',
                 };
 
                 // Send stream upload request for each file
-                return axios.post(`${API_ENDPOINT}/stream`, formData, { headers });
+                return axios.post(`${API_ENDPOINT}/stream`, file, { headers });
             });
 
             // Wait for all file uploads to complete
