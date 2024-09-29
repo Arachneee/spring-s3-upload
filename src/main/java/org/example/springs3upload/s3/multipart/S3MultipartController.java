@@ -68,8 +68,8 @@ public class S3MultipartController {
                 long contentLength = imageBytes.length;
 
                 // 파일명을 webp 확장자로 변경하고 UUID 추가
-                String originalFilename = file.getOriginalFilename();
-                String newFilename = originalFilename.split(".")[0] + UUID.randomUUID() + ".webp";
+//                String originalFilename = file.getOriginalFilename();
+                String newFilename = UUID.randomUUID() + ".webp";
                 String key = directoryPath + newFilename;
 
                 // S3에 업로드
