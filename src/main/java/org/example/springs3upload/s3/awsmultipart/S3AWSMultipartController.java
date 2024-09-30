@@ -3,6 +3,7 @@ package org.example.springs3upload.s3.awsmultipart;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,13 +28,15 @@ public class S3AWSMultipartController {
             @RequestParam String fileName,
             @RequestParam int partCount
     ) {
-        String key = KEY_PREFIX + fileName;
+        String uufile = UUID.randomUUID() + fileName;
+        String key = KEY_PREFIX + uufile;
         String uploadId = s3UploadService.createMultipartUpload(BUCKET_NAME, key);
         List<URL> presignedUrls = s3UploadService.generatePresignedUrls(BUCKET_NAME, key, uploadId, partCount);
 
         Map<String, Object> response = Map.of(
                 "uploadId", uploadId,
-                "presignedUrls", presignedUrls
+                "presignedUrls", presignedUrls,
+                "fileName", uufile
         );
 
         return new ResponseEntity<>(response, HttpStatus.OK);
