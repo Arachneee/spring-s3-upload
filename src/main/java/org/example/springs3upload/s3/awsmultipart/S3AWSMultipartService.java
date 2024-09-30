@@ -49,7 +49,7 @@ public class S3AWSMultipartService {
                     .build();
 
             PresignedUploadPartRequest presignedRequest = s3Presigner.presignUploadPart(r -> r
-                    .signatureDuration(Duration.ofMinutes(15))
+                    .signatureDuration(Duration.ofHours(2))
                     .uploadPartRequest(uploadPartRequest)
             );
 

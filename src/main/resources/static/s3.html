@@ -88,8 +88,10 @@
         try {
             const fileName = file.name;
             const fileSize = file.size;
-            const PART_SIZE = 5 * 1024 * 1024; //(fileSize + partCount - 1) / partCount; //  // 5MB
-            const partCount = Math.ceil(fileSize / PART_SIZE);
+            // const PART_SIZE = 5 * 1024 * 1024;
+            // const partCount = Math.ceil(fileSize / PART_SIZE);
+            const partCount = 6;
+            const PART_SIZE = (fileSize + partCount - 1) / partCount; //  // 5MB
 
             // Start multipart upload
             const startData = await startMultipartUpload(fileName, partCount);
