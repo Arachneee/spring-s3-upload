@@ -36,7 +36,7 @@ public class S3MultipartController {
                  ByteArrayOutputStream os = new ByteArrayOutputStream()) {
                 // 이미지를 100x100 크기로 리사이징하고 스트림에 저장
                 Thumbnails.of(inputStream)
-                        .scale(0.5)
+//                        .scale(0.5)
                         .size(100, 100)
                         .toOutputStream(os);
                 byte[] byteArray = os.toByteArray();
