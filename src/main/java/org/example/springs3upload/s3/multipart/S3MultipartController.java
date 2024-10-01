@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,17 +32,27 @@ public class S3MultipartController {
         String directoryPath = "haeng-dong/s3-upload-test/"; // 원하는 디렉토리 경로
 
         for (MultipartFile file : multipartFiles) {
-            try (InputStream inputStream = file.getInputStream()) {
-                long contentLength = file.getSize(); // 파일 크기 가져오기
-                System.out.println("contentLength = " + contentLength);
-                // S3에 업로드 (key에 디렉토리 경로 포함)
-                String key = directoryPath + UUID.randomUUID() + file.getOriginalFilename(); // 디렉토리 경로와 파일명 결합
-                s3UploadService.uploadImageToS3("techcourse-project-2024", key, inputStream, contentLength);
+            try (InputStream inputStream = file.getInputStream();
+                 ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                // 이미지를 100x100 크기로 리사이징하고 스트림에 저장
+                Thumbnails.of(inputStream)
+                        .size(100, 100)
+                        .toOutputStream(os);
+                byte[] byteArray = os.toByteArray();
+                try (ByteArrayInputStream is = new ByteArrayInputStream(byteArray)) {
+//                    long contentLength = file.getSize(); // 파일 크기 가져오기
+//                    System.out.println("contentLength = " + contentLength);
+                    // S3에 업로드 (key에 디렉토리 경로 포함)
+                    long contentLength = byteArray.length;
+                    String key = directoryPath + UUID.randomUUID() + file.getOriginalFilename(); // 디렉토리 경로와 파일명 결합
+                    s3UploadService.uploadImageToS3("techcourse-project-2024", key, is, contentLength);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
         return "업로드 완료";
     }
 
