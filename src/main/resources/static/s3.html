@@ -192,83 +192,12 @@
 
     // MultiPart 방식
     // Function to upload multiple files via the /api/multipart-files endpoint
-    // async function uploadMultipleFiles(files) {
-    //     try {
-    //         const formData = new FormData();
-    //         for (let i = 0; i < files.length; i++) {
-    //             formData.append('uploadFiles', files[i]); // Multiple files appended with the same key
-    //         }
-    //
-    //         const startTime = performance.now();
-    //         const response = await axios.post(`${API_ENDPOINT}/multipart-files`, formData, {
-    //             headers: {
-    //                 'Content-Type': 'multipart/form-data',
-    //             },
-    //         });
-    //         const endTime = performance.now(); // End timing
-    //
-    //         console.log(`Multipart File Upload Execution time: ${(endTime - startTime).toFixed(2)} ms`);
-    //         console.log('Multipart file upload response:', response.data);
-    //         alert('Multipart file upload completed successfully');
-    //     } catch (error) {
-    //         console.error('Error during multipart file upload:', error);
-    //         alert('Multipart file upload failed');
-    //     }
-    // }
-
-    // 리사이징
-
-    async function resizeImage(file, maxWidth, maxHeight) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
-
-            img.onload = () => {
-                // 이미지가 너무 크면 단계별로 리사이징을 수행
-                let width = img.width;
-                let height = img.height;
-                const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
-
-                // 초기 캔버스 크기 설정 (원본 이미지 크기)
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0, width, height);
-
-                // 큰 이미지를 메모리 제한 내에서 처리할 수 있도록 점진적으로 줄임
-                while (width > maxWidth || height > maxHeight) {
-                    width = Math.floor(width * 0.5);
-                    height = Math.floor(height * 0.5);
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(canvas, 0, 0, width, height); // 단계별 리사이징
-                }
-
-                // 최종 리사이징된 이미지에서 Blob 추출
-                canvas.toBlob((blob) => {
-                    resolve(blob);
-                }, file.type);
-            };
-
-            img.onerror = () => reject(new Error("Image load error"));
-        });
-    }
-
     async function uploadMultipleFiles(files) {
         try {
-            const maxWidth = 800;  // 원하는 최대 이미지 너비
-            const maxHeight = 600; // 원하는 최대 이미지 높이
             const formData = new FormData();
-
-            // 모든 파일을 리사이징하고, 결과를 배열에 저장
-            const resizePromises = Array.from(files).map(file =>
-                resizeImage(file, maxWidth, maxHeight).then(resizedBlob => {
-                    formData.append('uploadFiles', resizedBlob, file.name);
-                })
-            );
-
-            // 모든 이미지 리사이징 완료 대기
-            await Promise.all(resizePromises);
+            for (let i = 0; i < files.length; i++) {
+                formData.append('uploadFiles', files[i]); // Multiple files appended with the same key
+            }
 
             const startTime = performance.now();
             const response = await axios.post(`${API_ENDPOINT}/multipart-files`, formData, {
