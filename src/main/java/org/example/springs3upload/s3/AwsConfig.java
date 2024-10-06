@@ -8,6 +8,7 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -17,7 +18,12 @@ public class AwsConfig {
 
     @Bean
     public S3Client s3Client() {
+        ApacheHttpClient apacheHttpClient = (ApacheHttpClient) ApacheHttpClient.builder()
+                .maxConnections(200)
+                .build();
+
         return S3Client.builder()
+                .httpClient(apacheHttpClient)
                 .region(AP_NORTHEAST_2)
                 .build();
     }

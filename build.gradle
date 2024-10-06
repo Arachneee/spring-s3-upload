@@ -25,6 +25,8 @@ dependencies {
     implementation 'software.amazon.awssdk:s3:2.25.27'
     implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
 
+    implementation 'software.amazon.awssdk:apache-client:2.20.30'
+
     implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.20'
 
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
