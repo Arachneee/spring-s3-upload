@@ -4,6 +4,8 @@ import static software.amazon.awssdk.regions.Region.AP_NORTHEAST_2;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
@@ -32,6 +34,13 @@ public class AwsConfig {
         return S3Presigner.builder()
                 .region(AP_NORTHEAST_2)
                 .build();
+    }
+
+    @Bean
+    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatCustomizer() {
+        return factory -> {
+            factory.setProtocol("org.apache.coyote.http11.Http11NioProtocol");
+        };
     }
 
     @Bean
