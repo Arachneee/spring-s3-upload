@@ -4,14 +4,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import lombok.extern.slf4j.Slf4j;
 import org.example.springs3upload.s3.multipart.S3UploadService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 public class S3StreamController {
 
     private final S3UploadService s3InputStreamUploadService;
+    private AtomicInteger count = new AtomicInteger();
 
     public S3StreamController(S3UploadService s3InputStreamUploadService) {
         this.s3InputStreamUploadService = s3InputStreamUploadService;
@@ -19,6 +23,8 @@ public class S3StreamController {
 
     @PostMapping("/api/s3/stream")
     public String uploadFileByStream(HttpServletRequest request) {
+        int i = count.incrementAndGet();
+        log.info("######## COUNT : {}", i);
         try (InputStream inputStream = request.getInputStream()) {
             long contentLength = request.getContentLengthLong();
 
