@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
@@ -14,9 +16,11 @@ import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+@Slf4j
 @Component
 public class S3UploadService {
 
+    private AtomicInteger count = new AtomicInteger();
     private final S3Client s3Client;
     private final S3AsyncClient s3AsyncClient;
     private final ExecutorService executorService;
@@ -36,7 +40,10 @@ public class S3UploadService {
                 .contentType("image/" + key.split("\\.")[1])
                 .build();
 
-        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, contentLength));
+        RequestBody requestBody = RequestBody.fromInputStream(inputStream, contentLength);
+        int i = count.incrementAndGet();
+        log.info("######## SERVICE COUNT : {}", i);
+        s3Client.putObject(putObjectRequest, requestBody);
     }
 
     public void uploadImageToS3sAsync(String bucketName, List<MultipartFile> multipartFiles) {
