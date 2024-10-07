@@ -7,14 +7,14 @@ spring:
       max-file-size: 50MB
       max-request-size: 300MB
 
-server:
-  tomcat:
-    threads:
-      max: ${max-threads} # 최대 스레드 수
-      min-spare: 20 # 최소 여유 스레드 수
-    max-connections: ${max-connections} # 최대 동시 연결 수
-    accept-count: ${accept-count} # 큐에 쌓일 수 있는 최대 요청 수
-
+#server:
+#  tomcat:
+#    threads:
+#      max: ${max-threads} # 최대 스레드 수
+#      min-spare: 20 # 최소 여유 스레드 수
+#    max-connections: ${max-connections} # 최대 동시 연결 수
+#    accept-count: ${accept-count} # 큐에 쌓일 수 있는 최대 요청 수
+#
 management:
   endpoints:
     web:
