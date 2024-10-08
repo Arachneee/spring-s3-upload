@@ -52,6 +52,12 @@ public class S3AsyncUploadService {
         }
     }
 
+    public void uploadparallerBlocking(List<MultipartFile> images) {
+        images.stream()
+                .parallel()
+                .forEach(this::uploadImageBlocking);
+    }
+
     public void uploadAsyncBlocking(List<MultipartFile> images) {
 
     }
