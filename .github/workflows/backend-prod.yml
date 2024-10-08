@@ -52,8 +52,17 @@ jobs:
     needs: build
     runs-on: [ self-hosted ]
     steps:
-      - name: Docker down
-        run: sudo docker-compose -f docker-compose.yml down
+      - name: Docker remove
+        run: |
+          CONTAINER_IDS=$(sudo docker ps -qa)
+          if [ -n "$CONTAINER_IDS" ]; then
+            sudo docker rm -f $CONTAINER_IDS
+          else
+            echo "No running containers found."
+          fi
+
+      - name: Docker Image pull
+        run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/s3
 
       - name: Docker run
-        run: sudo docker-compose -f docker-compose.yml up -d
+        run: sudo docker run -d -p 80:8080 --name s3 ${{ secrets.DOCKER_USERNAME }}/s3
