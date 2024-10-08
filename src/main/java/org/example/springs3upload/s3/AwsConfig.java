@@ -19,7 +19,7 @@ public class AwsConfig {
     @Bean
     public S3Client s3Client() {
         ApacheHttpClient apacheHttpClient = (ApacheHttpClient) ApacheHttpClient.builder()
-                .maxConnections(200)
+                .maxConnections(50)
                 .build();
 
         return S3Client.builder()
