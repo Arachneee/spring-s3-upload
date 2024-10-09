@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,8 +60,16 @@ public class S3AsyncUploadService {
                 .forEach(this::uploadImageBlocking);
     }
 
-    public void uploadAsyncBlocking(List<MultipartFile> images) {
+    public void uploadAsyncBlocking(List<MultipartFile> images) throws Exception {
+        List<CompletableFuture<Void>> futures = images.stream()
+                .map(image -> CompletableFuture.runAsync(() -> uploadImageBlocking(image)))
+                .toList();
 
+        try {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        } catch (CompletionException e) {
+            throw (Exception) e.getCause();
+        }
     }
 
     public void uploadSyncNonBlocking(List<MultipartFile> images) {
