@@ -19,6 +19,7 @@ import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -121,7 +122,7 @@ public class S3AsyncUploadService {
             Thread thread = Thread.currentThread();
             InputStream finalInputStream = inputStream;
 
-            s3AsyncClient.putObject(
+            CompletableFuture<PutObjectResponse> future = s3AsyncClient.putObject(
                             putObjectRequest,
                             AsyncRequestBody.fromInputStream(inputStream, contentLength, executorService)
                     )
@@ -139,6 +140,9 @@ public class S3AsyncUploadService {
                             }
                         }
                     });
+
+            // 비동기 작업 완료 대기
+            future.join();  // 비동기 작업이 완료될 때까지 기다림
 
         } catch (IOException e) {
             log.error("업로드 실패: {}", e.getMessage());
