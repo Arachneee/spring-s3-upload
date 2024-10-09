@@ -92,7 +92,9 @@ public class S3AsyncUploadService {
                     .contentType(image.getContentType())
                     .build();
 
+            Thread thread = Thread.currentThread();
             s3Client.putObject(putObjectRequest, fromInputStream(inputStream, contentLength));
+            log.info("Blocking Thead {}, {} 업로드 완료", thread.getName(), thread.getId());
         } catch (IOException e) {
             throw new RuntimeException("업로드 실패");
         }
@@ -111,7 +113,9 @@ public class S3AsyncUploadService {
                     .contentType(image.getContentType())
                     .build();
 
+            Thread thread = Thread.currentThread();
             s3AsyncClient.putObject(putObjectRequest, AsyncRequestBody.fromInputStream(inputStream, contentLength, executorService));
+            log.info("Non Blocking Thead {}, {} 업로드 완료", thread.getName(), thread.getId());
         } catch (IOException e) {
             throw new RuntimeException("업로드 실패");
         }
