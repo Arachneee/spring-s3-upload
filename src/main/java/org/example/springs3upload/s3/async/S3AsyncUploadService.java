@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -101,7 +102,11 @@ public class S3AsyncUploadService {
     }
 
     private void uploadImageNonBlocking(MultipartFile image) {
-        try (InputStream inputStream = image.getInputStream()) {
+        InputStream inputStream = null;
+        AtomicBoolean isClosed = new AtomicBoolean(false);  // InputStream이 닫혔는지 여부를 추적
+
+        try {
+            inputStream = image.getInputStream();
             String fileName = UUID.randomUUID() + image.getOriginalFilename();
             String key = directoryPath + fileName;
             long contentLength = image.getSize();
@@ -114,10 +119,39 @@ public class S3AsyncUploadService {
                     .build();
 
             Thread thread = Thread.currentThread();
-            s3AsyncClient.putObject(putObjectRequest, AsyncRequestBody.fromInputStream(inputStream, contentLength, executorService));
-            log.info("Non Blocking Thead {}, {} 업로드 완료", thread.getName(), thread.getId());
+            InputStream finalInputStream = inputStream;
+
+            s3AsyncClient.putObject(
+                            putObjectRequest,
+                            AsyncRequestBody.fromInputStream(inputStream, contentLength, executorService)
+                    )
+                    .whenComplete((response, exception) -> {
+                        if (!isClosed.getAndSet(true)) {
+                            try {
+                                finalInputStream.close();
+                                if (exception != null) {
+                                    log.error("Non Blocking 업로드 실패: {}", exception.getMessage());
+                                } else {
+                                    log.info("Non Blocking Thead {}, {} 업로드 완료", thread.getName(), thread.getId());
+                                }
+                            } catch (IOException e) {
+                                log.error("InputStream 닫기 실패: {}", e.getMessage());
+                            }
+                        }
+                    });
+
         } catch (IOException e) {
-            throw new RuntimeException("업로드 실패");
+            log.error("업로드 실패: {}", e.getMessage());
+            throw new RuntimeException("업로드 실패", e);
+
+        } finally {
+            if (inputStream != null && !isClosed.getAndSet(true)) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.error("InputStream 닫기 실패: {}", e.getMessage());
+                }
+            }
         }
     }
 }
