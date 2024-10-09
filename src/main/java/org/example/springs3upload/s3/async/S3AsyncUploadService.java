@@ -60,7 +60,7 @@ public class S3AsyncUploadService {
                 .forEach(this::uploadImageBlocking);
     }
 
-    public void uploadAsyncBlocking(List<MultipartFile> images) throws Exception {
+    public void uploadAsyncBlocking(List<MultipartFile> images) {
         List<CompletableFuture<Void>> futures = images.stream()
                 .map(image -> CompletableFuture.runAsync(() -> uploadImageBlocking(image)))
                 .toList();
@@ -68,7 +68,7 @@ public class S3AsyncUploadService {
         try {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         } catch (CompletionException e) {
-            throw (Exception) e.getCause();
+            throw (RuntimeException) e.getCause();
         }
     }
 
