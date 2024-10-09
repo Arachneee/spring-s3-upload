@@ -28,6 +28,11 @@ public class AwsConfig {
                 .build();
     }
 
+    @Bean("fileUploadExecutorService")
+    public ExecutorService fileUploadExecutorService() {
+        return Executors.newFixedThreadPool(10);
+    }
+
     @Bean
     public S3AsyncClient s3AsyncClient() {
         return S3AsyncClient.builder()
@@ -49,8 +54,4 @@ public class AwsConfig {
         };
     }
 
-    @Bean
-    public ExecutorService executorService() {
-        return Executors.newFixedThreadPool(10);
-    }
 }

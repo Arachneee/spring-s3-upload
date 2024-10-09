@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +32,9 @@ public class S3AsyncUploadService {
 
     private final S3Client s3Client;
     private final S3AsyncClient s3AsyncClient;
+
+    @Qualifier("fileUploadExecutorService")
+    private final ExecutorService fileUploadExecutorService;
 
     public void uploadSyncBlocking(List<MultipartFile> images) {
         images.forEach(this::uploadImageBlocking);
@@ -54,7 +59,7 @@ public class S3AsyncUploadService {
         }
     }
 
-    public void uploadparallerBlocking(List<MultipartFile> images) {
+    public void uploadParallelBlocking(List<MultipartFile> images) {
         images.stream()
                 .parallel()
                 .forEach(this::uploadImageBlocking);
@@ -62,7 +67,7 @@ public class S3AsyncUploadService {
 
     public void uploadAsyncBlocking(List<MultipartFile> images) {
         List<CompletableFuture<Void>> futures = images.stream()
-                .map(image -> CompletableFuture.runAsync(() -> uploadImageBlocking(image)))
+                .map(image -> CompletableFuture.runAsync(() -> uploadImageBlocking(image), fileUploadExecutorService))
                 .toList();
 
         try {

@@ -18,9 +18,9 @@ public class S3AsyncController {
         s3AsyncUploadService.uploadSyncBlocking(images);
     }
 
-    @PostMapping("/paraller/blocking")
-    public void uploadParallerBlocking(@RequestPart("images") List<MultipartFile> images) {
-        s3AsyncUploadService.uploadparallerBlocking(images);
+    @PostMapping("/parallel/blocking")
+    public void uploadParallelBlocking(@RequestPart("images") List<MultipartFile> images) {
+        s3AsyncUploadService.uploadParallelBlocking(images);
     }
 
     @PostMapping("/async/blocking")
