@@ -9,12 +9,13 @@ import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
-public class AwsConfig {
+public class AwsS3Config {
 
     @Bean
     public S3Client s3Client() {
@@ -28,8 +29,8 @@ public class AwsConfig {
                 .build();
     }
 
-    @Bean("fileUploadExecutorService")
-    public ExecutorService fileUploadExecutorService() {
+    @Bean
+    public ExecutorService executorService() {
         return Executors.newFixedThreadPool(10);
     }
 
@@ -37,6 +38,9 @@ public class AwsConfig {
     public S3AsyncClient s3AsyncClient() {
         return S3AsyncClient.builder()
                 .region(AP_NORTHEAST_2)
+                .httpClientBuilder(NettyNioAsyncHttpClient.builder()
+                        .maxConcurrency(50)
+                )
                 .build();
     }
 
