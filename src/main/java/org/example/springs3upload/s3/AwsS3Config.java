@@ -8,6 +8,7 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
@@ -41,6 +42,7 @@ public class AwsS3Config {
     public S3AsyncClient s3AsyncClient() {
         return S3AsyncClient.builder()
                 .region(Region.AP_NORTHEAST_2) // 지역 설정
+                .credentialsProvider(InstanceProfileCredentialsProvider.create())
                 .httpClientBuilder(NettyNioAsyncHttpClient.builder()
                         .maxConcurrency(50)  // 최대 동시 요청 설정
                 )
