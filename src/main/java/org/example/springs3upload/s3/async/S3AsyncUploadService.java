@@ -105,8 +105,10 @@ public class S3AsyncUploadService {
 
     private void uploadImageNonBlocking(MultipartFile image) {
         AtomicBoolean isClosed = new AtomicBoolean(false);  // InputStream이 닫혔는지 여부를 추적
+        InputStream inputStream = null;
 
-        try (InputStream inputStream = new BufferedInputStream(image.getInputStream())) {
+        try {
+            inputStream = new BufferedInputStream(image.getInputStream());
             String fileName = UUID.randomUUID() + image.getOriginalFilename();
             String key = directoryPath + fileName;
             long contentLength = image.getSize();
@@ -118,18 +120,26 @@ public class S3AsyncUploadService {
                     .contentType(image.getContentType())
                     .build();
 
+            InputStream finalInputStream = inputStream;
+
             CompletableFuture<PutObjectResponse> future = s3AsyncClient.putObject(
                     putObjectRequest,
                     AsyncRequestBody.fromInputStream(inputStream, contentLength, executorService)
             ).whenComplete((response, exception) -> {
-                if (exception != null) {
-                    log.error("Non Blocking 업로드 실패: ", exception.getCause());
-                } else {
-                    log.info("Non Blocking 업로드 완료");
+                if (!isClosed.getAndSet(true)) {
+                    try {
+                        finalInputStream.close();
+                        if (exception != null) {
+                            log.error("Non Blocking 업로드 실패: {}", exception.getMessage());
+                        } else {
+                            log.info("Non Blocking 업로드 완료");
+                        }
+                    } catch (IOException e) {
+                        log.error("InputStream 닫기 실패: {}", e.getMessage());
+                    }
                 }
             });
 
-            // 비동기 작업은 자동으로 진행되고, InputStream은 try-with-resources로 자동 닫힘.
         } catch (IOException e) {
             log.error("업로드 실패: {}", e.getMessage());
             throw new RuntimeException("업로드 실패", e);
