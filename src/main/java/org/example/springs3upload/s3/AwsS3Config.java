@@ -8,8 +8,11 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -37,17 +40,14 @@ public class AwsS3Config {
     @Bean
     public S3AsyncClient s3AsyncClient() {
         return S3AsyncClient.builder()
-                .region(AP_NORTHEAST_2)
+                .region(Region.AP_NORTHEAST_2) // 지역 설정
                 .httpClientBuilder(NettyNioAsyncHttpClient.builder()
-                        .maxConcurrency(50)
+                        .maxConcurrency(50)  // 최대 동시 요청 설정
                 )
-//                .asyncConfiguration(
-//                        b -> b.advancedOption(
-//                                SdkAdvancedAsyncClientOption
-//                                        .FUTURE_COMPLETION_EXECUTOR,
-//                                Executors.newFixedThreadPool(10)
-//                        )
-//                )
+                .overrideConfiguration(ClientOverrideConfiguration.builder()
+                        .retryPolicy(RetryPolicy.none())  // 재시도 정책 비활성화
+                        .build()
+                )
                 .build();
     }
 
