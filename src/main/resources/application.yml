@@ -21,9 +21,9 @@ management:
       exposure:
         include: prometheus
 
-logging:
-  level:
-    software.amazon.awssdk: DEBUG
+#logging:
+#  level:
+#    software.amazon.awssdk: DEBUG
 
 image:
   bucket: techcourse-project-2024

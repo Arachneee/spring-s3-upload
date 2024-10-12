@@ -2,11 +2,13 @@ package org.example.springs3upload.s3.async;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 public class S3AsyncController {
@@ -41,5 +43,6 @@ public class S3AsyncController {
     @PostMapping("/async/non-blocking")
     public void uploadAsyncNonBlocking(@RequestPart("images") List<MultipartFile> images) {
         s3AsyncUploadService.uploadAsyncNonBlocking(images);
+        log.info("전체 업로드 종료");
     }
 }

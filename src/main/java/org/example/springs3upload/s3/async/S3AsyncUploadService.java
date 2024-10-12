@@ -43,7 +43,6 @@ public class S3AsyncUploadService {
 
     public void uploadSyncNonBlocking(List<MultipartFile> images) {
         images.forEach(this::uploadImageNonBlocking);
-
     }
 
     public void uploadParallelBlocking(List<MultipartFile> images) {
@@ -71,6 +70,7 @@ public class S3AsyncUploadService {
     }
 
     public void uploadAsyncNonBlocking(List<MultipartFile> images) {
+        log.info("전체 업로드 시작");
         List<CompletableFuture<Void>> futures = images.stream()
                 .map(image -> CompletableFuture.runAsync(() -> uploadImageNonBlocking(image), executorService))
                 .toList();
@@ -139,7 +139,6 @@ public class S3AsyncUploadService {
                     }
                 }
             });
-
         } catch (IOException e) {
             log.error("업로드 실패: {}", e.getMessage());
             throw new RuntimeException("업로드 실패", e);
