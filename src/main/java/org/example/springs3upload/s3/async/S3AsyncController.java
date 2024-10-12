@@ -33,6 +33,7 @@ public class S3AsyncController {
     @PostMapping("/sync/non-blocking")
     public void uploadSyncNonBlocking(@RequestPart("images") List<MultipartFile> images) {
         s3AsyncUploadService.uploadSyncNonBlocking(images);
+        log.info("전체 업로드 종료");
     }
 
     @PostMapping("/parallel/non-blocking")

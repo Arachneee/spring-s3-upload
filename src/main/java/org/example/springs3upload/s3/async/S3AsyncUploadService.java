@@ -42,6 +42,7 @@ public class S3AsyncUploadService {
     }
 
     public void uploadSyncNonBlocking(List<MultipartFile> images) {
+        log.info("전체 업로드 시작");
         images.forEach(this::uploadImageNonBlocking);
     }
 
