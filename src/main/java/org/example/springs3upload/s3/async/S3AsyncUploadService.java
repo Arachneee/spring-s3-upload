@@ -122,7 +122,7 @@ public class S3AsyncUploadService {
                     AsyncRequestBody.fromInputStream(inputStream, contentLength, executorService)
             ).whenComplete((response, exception) -> {
                 if (exception != null) {
-                    log.error("Non Blocking 업로드 실패: {}", exception.getMessage());
+                    log.error("Non Blocking 업로드 실패: ", exception.getCause());
                 } else {
                     log.info("Non Blocking 업로드 완료");
                 }
