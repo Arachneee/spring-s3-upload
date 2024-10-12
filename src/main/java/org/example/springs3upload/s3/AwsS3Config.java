@@ -41,6 +41,13 @@ public class AwsS3Config {
                 .httpClientBuilder(NettyNioAsyncHttpClient.builder()
                         .maxConcurrency(50)
                 )
+//                .asyncConfiguration(
+//                        b -> b.advancedOption(
+//                                SdkAdvancedAsyncClientOption
+//                                        .FUTURE_COMPLETION_EXECUTOR,
+//                                Executors.newFixedThreadPool(10)
+//                        )
+//                )
                 .build();
     }
 

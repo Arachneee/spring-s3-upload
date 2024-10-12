@@ -103,11 +103,9 @@ public class S3AsyncUploadService {
     }
 
     private void uploadImageNonBlocking(MultipartFile image) {
-        InputStream inputStream = null;
         AtomicBoolean isClosed = new AtomicBoolean(false);  // InputStream이 닫혔는지 여부를 추적
 
-        try {
-            inputStream = image.getInputStream();
+        try (InputStream inputStream = image.getInputStream()) {  // try-with-resources로 InputStream 사용
             String fileName = UUID.randomUUID() + image.getOriginalFilename();
             String key = directoryPath + fileName;
             long contentLength = image.getSize();
@@ -119,43 +117,21 @@ public class S3AsyncUploadService {
                     .contentType(image.getContentType())
                     .build();
 
-            Thread thread = Thread.currentThread();
-            InputStream finalInputStream = inputStream;
-
             CompletableFuture<PutObjectResponse> future = s3AsyncClient.putObject(
-                            putObjectRequest,
-                            AsyncRequestBody.fromInputStream(inputStream, contentLength, executorService)
-                    )
-                    .whenComplete((response, exception) -> {
-                        if (!isClosed.getAndSet(true)) {
-                            try {
-                                finalInputStream.close();
-                                if (exception != null) {
-                                    log.error("Non Blocking 업로드 실패: {}", exception.getMessage());
-                                } else {
-                                    log.info("Non Blocking Thead {}, {} 업로드 완료", thread.getName(), thread.getId());
-                                }
-                            } catch (IOException e) {
-                                log.error("InputStream 닫기 실패: {}", e.getMessage());
-                            }
-                        }
-                    });
+                    putObjectRequest,
+                    AsyncRequestBody.fromInputStream(inputStream, contentLength, executorService)
+            ).whenComplete((response, exception) -> {
+                if (exception != null) {
+                    log.error("Non Blocking 업로드 실패: {}", exception.getMessage());
+                } else {
+                    log.info("Non Blocking 업로드 완료");
+                }
+            });
 
-            // 비동기 작업 완료 대기
-            future.join();  // 비동기 작업이 완료될 때까지 기다림
-
+            // 비동기 작업은 자동으로 진행되고, InputStream은 try-with-resources로 자동 닫힘.
         } catch (IOException e) {
             log.error("업로드 실패: {}", e.getMessage());
             throw new RuntimeException("업로드 실패", e);
-
-        } finally {
-            if (inputStream != null && !isClosed.getAndSet(true)) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    log.error("InputStream 닫기 실패: {}", e.getMessage());
-                }
-            }
         }
     }
 }
