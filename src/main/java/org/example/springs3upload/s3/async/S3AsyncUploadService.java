@@ -59,6 +59,7 @@ public class S3AsyncUploadService {
     }
 
     public void uploadAsyncBlocking(List<MultipartFile> images) {
+        log.info("전체 업로드 시작");
         List<CompletableFuture<Void>> futures = images.stream()
                 .map(image -> CompletableFuture.runAsync(() -> uploadImageBlocking(image), executorService))
                 .toList();
