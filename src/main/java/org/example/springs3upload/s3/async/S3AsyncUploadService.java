@@ -2,6 +2,7 @@ package org.example.springs3upload.s3.async;
 
 import static software.amazon.awssdk.core.sync.RequestBody.fromInputStream;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -105,7 +106,7 @@ public class S3AsyncUploadService {
     private void uploadImageNonBlocking(MultipartFile image) {
         AtomicBoolean isClosed = new AtomicBoolean(false);  // InputStream이 닫혔는지 여부를 추적
 
-        try (InputStream inputStream = image.getInputStream()) {  // try-with-resources로 InputStream 사용
+        try (InputStream inputStream = new BufferedInputStream(image.getInputStream())) {
             String fileName = UUID.randomUUID() + image.getOriginalFilename();
             String key = directoryPath + fileName;
             long contentLength = image.getSize();
